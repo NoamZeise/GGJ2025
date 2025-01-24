@@ -39,6 +39,8 @@
 	   (with-slots (objects) scene
 	     (loop for o in objects do (fw:draw o shader))))
 
+;;; Main Scene
+
 (defclass main-scene (scene) ())
 
 (defun make-main-scene ()
@@ -46,3 +48,30 @@
    'main-scene
    :objects (list (make-object (fw:get-asset 'quad)
 			       (make-2d-mat 100 100 200 300)))))
+
+;;; Post Scene
+
+(defclass dummy-object () ())
+
+(defmethod fw:draw ((o dummy-object) shader)
+  (fw:shader-model-props shader o)
+  (gficl:bind-gl (fw:get-asset 'dummy-data))
+  (gl:draw-arrays :triangles 0 3))
+
+(defclass post-scene (scene)
+  ((width :initarg :width)
+   (height :initarg :height)
+   (tex :initarg :tex)))
+
+(defun make-post-scene (tex target-w target-h)
+  (make-instance
+   'post-scene
+   :tex tex :width target-w :height target-h
+   :objects (list (make-instance 'dummy-object))))
+
+(defun update-post-scene-tex (post-scene tex)
+  (setf (slot-value post-scene 'tex) tex))
+
+(defmethod fw:resize ((s post-scene) w h)
+  (with-slots (viewproj width height) s
+    (setf viewproj (gficl:target-resolution-matrix width height w h))))

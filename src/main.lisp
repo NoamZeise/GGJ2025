@@ -32,18 +32,16 @@
   (fw:load-image 'test #p"assets/test.png"))
 
 (defun create-pipelines ()
-  (setf *pipelines* (list (cons "main" (make-main-pipeline))))
-  (if (not *active-pipeline*) (setf *active-pipeline* (caar *pipelines*))))
+  (setf *main-pipeline* (make-main-pipeline *target-width* *target-height*)))
 
 (defun create-scenes ()
-  (setf *scenes*
-	(list (make-main-scene))))
+  (setf *main-scene* (make-main-scene))
+  (fw:resize *main-scene* *target-width* *target-height*))
 
 (defun setup ()
   (fw:init-watched)
   (load-assets)
   (setf *signal-fn* nil)
-  (setf *active-pipeline* nil)
   (create-pipelines)
   (create-scenes)
   (resize-callback (gficl:window-width) (gficl:window-height))
@@ -51,19 +49,15 @@
   (gl:front-face :cw)
   (gl:cull-face :front))
 
-(defmacro foreach-v (alist (pipeline-var) &body body)
-  `(loop for (_ . ,pipeline-var) in ,alist do (progn ,@body)))
-
 (defun cleanup-pipelines ()
-  (foreach-v *pipelines* (p) (fw:free p)))
+  (fw:free *main-pipeline*))
   
 (defun cleanup ()
   (cleanup-pipelines)
   (fw:cleanup-assets))
 
 (defun resize-callback (w h)
-  (loop for scene in *scenes* do (fw:resize scene w h))
-  (foreach-v *pipelines* (p) (fw:resize p w h)))
+  (fw:resize *main-pipeline* w h))
 
 (defun update ()
   (gficl:with-update (dt)
@@ -85,12 +79,12 @@
 	   (funcall *signal-fn*)
 	   (setf *signal-fn* nil)))
     (cond ((fw:process-watched)
-	   (foreach-v *pipelines* (p) (fw:reload p))
+	   (fw:reload *main-pipeline*)
 	   (fw:set-all-unmodified)))))
 
 (defun render ()
   (gficl:with-render
-   (fw:draw (cdr (assoc *active-pipeline* *pipelines*)) *scenes*)))
+   (fw:draw *main-pipeline* (list *main-scene*))))
 
 ;;; signal running program functions
 
@@ -116,10 +110,10 @@
 
 ;;; Global Variables
 
-(defparameter *pipelines* nil)
+(defparameter *main-pipeline* nil)
 
 (defparameter *active-pipeline* nil)
 
-(defparameter *scenes* nil)
+(defparameter *main-scene* nil)
 
 (defparameter *signal-fn* nil)
