@@ -72,9 +72,11 @@
      ;; 		  (if r (caar r) (caar *pipelines*))))
      ;;  (format t "using ~a pipeline~%" *active-pipeline*))
      )
-    ;(format t "fps: ~d~%" (round (/ 1 (float dt))))
-    (loop for scene in *scenes* do
-	  (fw:update-scene scene dt))
+    (gficl:map-buttons-down
+     (:left (format t "fps: ~d~%" (round (/ 1 (float dt)))))
+     (:right (format t "~a~%" (gficl:mouse-pos))))
+					;(format t "fps: ~d~%" (round (/ 1 (float dt))))
+    (fw:update-scene *main-scene* dt)
     (cond (*signal-fn*
 	   (funcall *signal-fn*)
 	   (setf *signal-fn* nil)))

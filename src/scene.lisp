@@ -19,6 +19,10 @@
    (gficl:translation-matrix (list x y depth))
    (gficl:scale-matrix (list w h 1))))
 
+(defun update-object-model (object model)
+  (with-slots ((m model)) object
+    (setf m model)))
+
 (defclass scene ()
   ((view :type gficl:matrix)
    (proj :type gficl:matrix)
@@ -49,6 +53,11 @@
    :objects (list (make-object (fw:get-asset 'quad)
 			       (make-2d-mat 100 100 200 300)))))
 
+(defmethod fw:update-scene ((s main-scene) dt)
+  (with-slots (objects) s
+    (destructuring-bind (x y) (mouse-pos)
+      (update-object-model (car objects) (make-2d-mat x y 200 200)))))
+
 ;;; Post Scene
 
 (defclass dummy-object () ())
@@ -74,4 +83,5 @@
 
 (defmethod fw:resize ((s post-scene) w h)
   (with-slots (viewproj width height) s
-    (setf viewproj (gficl:target-resolution-matrix width height w h))))
+    (setf viewproj (gficl:target-resolution-matrix width height w h))
+    (setf *inverse-target-mat* (gficl:inverse-matrix viewproj))))

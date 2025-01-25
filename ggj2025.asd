@@ -15,6 +15,7 @@
   :components ((:module "src"
 		:components
 		((:file "package")
+		 (:file "globals")
 		 (:file "main")
 		 (:file "scene")
 		 (:file "pipeline")))))
