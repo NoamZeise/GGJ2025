@@ -6,9 +6,11 @@
 
 (defmethod fw:reload ((s main-shader))
   (fw:shader-reload-files (s (#p"main.vs" #p"main.fs")) shader
-     ()))
+     (gl:uniformi (gficl:shader-loc shader "tex") 0)))
 
 (defmethod fw:draw ((s main-shader) scene)
+  (gl:enable :depth-test)
+  (gl:active-texture :texture0)
   (call-next-method))
 
 (defmethod fw:shader-scene-props ((s main-shader) (scene scene))
@@ -17,9 +19,11 @@
       (gficl:bind-matrix shader "viewproj" viewproj))))
 
 (defmethod fw:shader-model-props ((s main-shader) (o object))
-  (with-slots (model) o
+  (with-slots (model tex colour) o
     (with-slots ((shader fw:shader)) s      
-      (gficl:bind-matrix shader "model" model))))
+      (gficl:bind-matrix shader "model" model)
+      (gficl:bind-vec shader "tint" colour)
+      (gficl:bind-gl tex))))
 
 ;;; Main Pass
 
@@ -32,8 +36,9 @@
    :description
    (fw:make-framebuffer-description
     (list (gficl:make-attachment-description :type :texture)
-	  (gficl:make-attachment-description :position :depth-attachment)))
-   :samples 16))
+	  (gficl:make-attachment-description :position :depth-attachment))    
+    :samples 16)
+   :clear-colour '(0.184 0.156 0.458 0.0)))
 
 ;;; Post Shader
 

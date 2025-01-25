@@ -5,6 +5,12 @@ in vec2 fuv;
 
 out vec4 colour;
 
+uniform sampler2D tex;
+uniform vec4 tint;
+
 void main() {
-  colour = vec4(fuv.x, fuv.y, 1, 1);
+  vec4 tex_col = texture(tex, fuv);
+  if(tex_col.a == 0)
+    discard;
+  colour = tex_col * tint;
 }

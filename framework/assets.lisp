@@ -66,8 +66,8 @@
   (add-to-asset-table key
     (multiple-value-bind (tex w h) (gficl/load:image filename)
       (add-asset-object tex)
-      ;(pairlis '(:tex :width :height) (list tex w h))
-      tex
+      (pairlis '(:tex :width :height) (list tex w h))
+      ;tex
       )))
 
 (defun get-asset (key)

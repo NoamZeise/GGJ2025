@@ -18,4 +18,7 @@
 		 (:file "globals")
 		 (:file "main")
 		 (:file "scene")
-		 (:file "pipeline")))))
+		 (:file "pipeline")
+		 (:file "game")
+		 (:file "game-objects")
+		 (:file "geometry")))))

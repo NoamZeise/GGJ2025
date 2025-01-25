@@ -7,7 +7,9 @@
 (defun program ()
   (gficl:with-window
    (:title "GGJ 2025"
-    :resize-callback #'resize-callback)
+    :resize-callback #'resize-callback
+    :width *target-width*
+    :height *target-height*)
    (setup)
    (loop until (gficl:closedp)
 	 do (update)
@@ -29,14 +31,16 @@
 		   ((1 1) (1 1))
 		   ((0 1) (0 1)))
 		 '(0 3 2 2 1 0)))
-  (fw:load-image 'test #p"assets/test.png"))
+  (fw:load-image 'test #p"assets/test.png")
+  (fw:load-image 'fairy #p"assets/fairy.png")
+  (fw:load-image 'bouba #p"assets/bouba.png")
+  (fw:load-image 'arrow #p"assets/arrow.png"))
 
 (defun create-pipelines ()
   (setf *main-pipeline* (make-main-pipeline *target-width* *target-height*)))
 
 (defun create-scenes ()
-  (setf *main-scene* (make-main-scene))
-  (fw:resize *main-scene* *target-width* *target-height*))
+  (setf *game* (make-game *target-width* *target-height*)))
 
 (defun setup ()
   (fw:init-watched)
@@ -63,20 +67,9 @@
   (gficl:with-update (dt)
     (gficl:map-keys-pressed
      (:escape (glfw:set-window-should-close))
-     (:f (gficl:toggle-fullscreen t))
-     ;; (:m
-     ;;  (setf *active-pipeline*
-     ;; 	    (loop for ((k . _) . r) on *pipelines*
-     ;; 		  when (equalp k *active-pipeline*)
-     ;; 		  return
-     ;; 		  (if r (caar r) (caar *pipelines*))))
-     ;;  (format t "using ~a pipeline~%" *active-pipeline*))
-     )
-    (gficl:map-buttons-down
-     (:left (format t "fps: ~d~%" (round (/ 1 (float dt)))))
-     (:right (format t "~a~%" (gficl:mouse-pos))))
-					;(format t "fps: ~d~%" (round (/ 1 (float dt))))
-    (fw:update-scene *main-scene* dt)
+     (:f (gficl:toggle-fullscreen t)))
+    ;;(format t "fps: ~d~%" (round (/ 1 (float dt))))
+    (update-obj *game* dt)
     (cond (*signal-fn*
 	   (funcall *signal-fn*)
 	   (setf *signal-fn* nil)))
@@ -86,7 +79,7 @@
 
 (defun render ()
   (gficl:with-render
-   (fw:draw *main-pipeline* (list *main-scene*))))
+   (fw:draw *main-pipeline* (list (main-scene *game*)))))
 
 ;;; signal running program functions
 
@@ -116,6 +109,6 @@
 
 (defparameter *active-pipeline* nil)
 
-(defparameter *main-scene* nil)
-
 (defparameter *signal-fn* nil)
+
+(defparameter *game* nil)
