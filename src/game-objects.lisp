@@ -37,15 +37,20 @@
      (x y w h) (gficl:vec-data rect)
      (gficl:make-vec (list (+ x (/ w 2)) (+ y (/ h 2)))))))
 
-(defun make-game-obj (x y width height depth tex-asset &optional (type 'game-object))
+(defun get-game-object-pos (obj)
+  (with-slots (rect) obj
+    (gficl:get-n-vec 2 rect)))
+
+(defun make-game-obj (x y width height depth tex-asset radius
+			&key (mass-mult 1.0) (type 'game-object))
   (let ((obj (make-object (fw:get-asset 'quad) (gficl:make-matrix) tex-asset
 			  type)))
     (with-slots (rect collider mass pivot (d depth)) obj
       (setf rect (gficl:make-vec (list x y width height)))
       (setf collider
 	    (make-circle-collider (get-target obj)
-				  (* 0.8 (/ (max width height) 2))))
-      (setf mass (max width height))
+				  (* radius (/ (max width height) 2))))
+      (setf mass (* mass-mult (max width height)))
       (setf pivot (gficl:make-vec (list (/ width 2) (/ height 2))))
       (setf d depth))
     (update-model obj)
@@ -114,10 +119,7 @@
    (aim-dir :initform (gficl:make-vec '(0 0)) :type gficl:vec :accessor aim-dir)))
 
 (defun make-player (x y)
-  (let ((player (make-game-obj x y 40 40 0 (fw:get-asset 'fairy) 'player)))    
-    (with-slots (collider) player
-      (with-slots (radius) collider
-	(setf radius (* radius 0.8))))
+  (let ((player (make-game-obj x y 40 40 0 (fw:get-asset 'fairy) 0.64 :type 'player)))
     player))
 
 (defmethod update-obj ((p player) dt)
@@ -143,7 +145,7 @@
 		   (progn
 		     (setf selected t)
 		     (setf *game-speed* 0.1)
-		     (setf colour (gficl:make-vec '(1 0.6 0.6 1))))))
+		     (setf colour (gficl:make-vec '(0.96 0.96 0.7 1))))))
 	   (setf colour (gficl:make-vec '(1 1 1 1))))))
      (call-next-method))))
 
@@ -155,7 +157,7 @@
    (uv-model :initform (gficl:make-matrix) :type matrix)))
 
 (defun make-bg-obj (x y width height depth tex-asset &optional (scale 1.0) (size 1.0))
-  (let ((obj (make-game-obj x y width height depth tex-asset 'bg-object)))
+  (let ((obj (make-game-obj x y width height depth tex-asset 0 :type 'bg-object)))
     (with-slots ((s scale) (sz size)) obj
       (setf s scale)
       (setf sz size)

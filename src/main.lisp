@@ -31,9 +31,20 @@
 		   ((1 1) (1 1))
 		   ((0 1) (0 1)))
 		 '(0 3 2 2 1 0)))
-  (fw:load-image 'test #p"assets/test.png")
   (fw:load-image 'fairy #p"assets/bubbalah.png")
-  (fw:load-image 'bouba #p"assets/bouba.png")
+  
+  (fw:load-image 'bloog #p"assets/Bloog.png")  
+  (fw:load-image 'orring #p"assets/Orring.png")
+  (fw:load-image 'planbit #p"assets/Planbit.png")
+  (fw:load-image 'ringus #p"assets/Ringus.png")
+  (fw:load-image 'gloogs #p"assets/Gloogs.png")
+
+  (fw:load-image 'gloob #p"assets/Gloob.png")
+  (fw:load-image 'swirl #p"assets/Swirl.png")
+  (fw:load-image 'eggbert #p"assets/Eggbert.png")
+  (fw:load-image 'yumb #p"assets/Yumb.png")
+  (fw:load-image 'luv #p"assets/Luv.png")
+  
   (fw:load-image 'arrow #p"assets/arrow.png")
   (fw:load-image 'bg0 #p"assets/bg0.png")
   (fw:load-image 'bg1 #p"assets/bg1.png")
