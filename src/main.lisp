@@ -40,18 +40,20 @@
 
   (fw:load-image 'dreamb #p"assets/Dreamb.png")
   (fw:load-image 'dreamp #p"assets/Dreamp.png")
+  (fw:load-image 'dreamg #p"assets/Dreamg.png")
+  (fw:load-image 'dreamr #p"assets/Dreamr.png")
 
   (fw:load-image 'gloob #p"assets/Gloob.png")
-  (fw:load-image 'swirl #p"assets/Swirl.png")
   (fw:load-image 'eggbert #p"assets/Eggbert.png")
   (fw:load-image 'yumb #p"assets/Yumb.png")
-  (fw:load-image 'luv #p"assets/Luv.png")
   
   (fw:load-image 'arrow #p"assets/arrow.png")
+  (fw:load-image 'sun #p"assets/sun.png")
   (fw:load-image 'bg0 #p"assets/bg0.png")
-  (fw:load-image 'bg1 #p"assets/bg1.png")
+  (fw:load-image 'bg1 #p"assets/BGLayer.png")
   (fw:load-image 'bg-clouds1 #p"assets/bg-clouds1.png")
   (fw:load-image 'bg-stars #p"assets/bg-stars.png")
+  (fw:load-image 'bg00 #p"assets/bg00.png")
 
   (fw:load-image 'noise #p"assets/noise.png"))
 
@@ -99,7 +101,7 @@
 (defun render ()
   (gficl:with-render
    (fw:draw *main-pipeline*
-	    (list (bg-scene *game*) (main-scene *game*)))))
+	    (get-active-scenes *game*))))
 
 ;;; signal running program functions
 

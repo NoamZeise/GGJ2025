@@ -1,10 +1,10 @@
 LISP := "sbcl"
-exec-name := project
+exec-name := ggj2025
 build-dir := bin
 
 code := $(wildcard src/**.lisp)
 gficl-code := $(wildcard gficl/src/**.lisp)
-build-deps := $(code) project.asd $(gficl-code) gficl/gficl.asd
+build-deps := $(code) ggj2025.asd $(gficl-code) gficl/gficl.asd
 
 assets-src := $(wildcard assets/*)
 assets := $(assets-src:%=$(build-dir)/%)
@@ -17,16 +17,16 @@ build: build-setup $(build-dir)/$(exec-name)
 
 $(build-dir)/$(exec-name): $(build-deps)
 	$(LISP)	--eval "(ql:quickload :deploy)" \
-		--load project.asd \
-		--eval "(ql:quickload :project)" \
-		--eval "(asdf:make :project)"
+		--load ggj2025.asd \
+		--eval "(ql:quickload :ggj2025)" \
+		--eval "(asdf:make :ggj2025)"
 
 # build without quicklisp
 .PHONY: asdf
 asdf: build-setup $(build-deps)
 	$(LISP)	--load project.asd \
-                --eval "(asdf:load-system :project)" \
-                --eval "(asdf:make :project)"
+                --eval "(asdf:load-system :ggj2025)" \
+                --eval "(asdf:make :ggj2025)"
 
 .PHONY: build-setup
 build-setup: gficl $(assets) $(shaders)
@@ -50,7 +50,7 @@ $(build-dir):
 .PHONY: repl
 repl: gficl
 	$(LISP) --load repl-setup.lisp \
-	     	--eval "(project:run)"
+	     	--eval "(ggj2025:run)"
 
 .PHONY: clean
 clean:

@@ -110,13 +110,45 @@
 					    (/ (gficl:dot v2-v1 x2-x1) (* d d)))
 					 x2-x1)))
 		      (setf a1 (/ (+ a1 (- a2)) 2))
-		      (setf a2 (/ (+ a2 (- a1)) 2))))))))))))
+		      (setf a2 (/ (+ a2 (- a1)) 2))))))))
+	col))))
+
+;;; Noise
+
+(defclass noise-object (game-object)
+  ((noise-speed :initform 0.0 :type float)))
+
+(defun make-noise-obj (x y width height depth radius tex-asset mass-mult
+			 &key (type 'noise-object))
+  (let ((obj (make-game-obj x y width height depth tex-asset radius
+			    :mass-mult mass-mult :type type)))
+    (with-slots ((ns noise-speed) angular-friction angular-velocity) obj
+      (setf ns (+ 0.01 (- (random 0.02) 0.01)))
+      (setf angular-friction 0.0)
+      (setf angular-velocity (/ (random 100) 400)))
+    obj))
+
+(defclass dream-goal (game-object) ())
+
+(defclass bubble (dream-goal)
+  ((following :initform nil :accessor following)))
+
+(defmethod update-obj ((p bubble) dt)
+	   (with-slots (following rect velocity angular-velocity selected colour aim-dir) p
+	     (if following
+		 (progn
+		   (setf velocity
+			 (gficl:*vec 3 (gficl:-vec following (gficl:get-n-vec 2 rect))))))
+	     (call-next-method)))
+
+(defclass dream-object (noise-object) ())
 
 ;;; Player
 
 (defclass player (game-object)
   ((selected :initform nil :accessor selected)
-   (aim-dir :initform (gficl:make-vec '(0 0)) :type gficl:vec :accessor aim-dir)))
+   (aim-dir :initform (gficl:make-vec '(0 0)) :type gficl:vec :accessor aim-dir)
+   (in-dream :initform nil)))
 
 (defun make-player (x y)
   (let ((player (make-game-obj x y 80 80 -0.01 (fw:get-asset 'fairy) 0.64 :type 'player)))
@@ -149,22 +181,13 @@
 	   (setf colour (gficl:make-vec '(1 1 1 1))))))
      (call-next-method))))
 
-(defmethod )
-
-
-;;; Noise
-
-(defclass noise-object (game-object)
-  ((noise-speed :initform 0.0 :type float)))
-
-(defun make-noise-obj (x y width height depth radius tex-asset mass-mult)
-  (let ((obj (make-game-obj x y width height depth tex-asset radius
-			    :mass-mult mass-mult :type 'noise-object)))
-    (with-slots ((ns noise-speed) angular-friction angular-velocity) obj
-      (setf ns (+ 0.01 (- (random 0.02) 0.01)))
-      (setf angular-friction 0.0)
-      (setf angular-velocity (/ (random 100) 400)))
-    obj))
+(defmethod collision ((obj1 player) (obj2 dream-object))
+  (with-slots ((c1 collider) (v1 velocity) (m1 mass) (a1 angular-velocity)) obj1
+    (with-slots ((c2 collider) (v2 velocity) (m2 mass) (a2 angular-velocity)) obj2
+      (let ((col (collision c1 c2)))
+	(cond (col
+	       (setf v1 (gficl:make-vec '(0 0)))))
+	col))))
 
 ;;; BG
 (defclass bg-object (game-object)
@@ -186,8 +209,8 @@
      (x y width height) (gficl:vec-data rect)
      (declare (ignore x y))
      (setf uv-model
-	   (let ((sx (* *x* scale))
-		 (sy (* -1 *y* scale))
+	   (let ((sx (+ (* *x* scale) 800))
+		 (sy (+ (* -1 *y* scale) 450))
 		 (z (expt *zoom* (- scale)))
 		 (ratio (/ width height)))
 	     (gficl:*mat

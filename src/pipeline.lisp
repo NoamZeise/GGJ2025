@@ -19,6 +19,7 @@
   (with-slots (time viewproj) scene
     (with-slots ((shader fw:shader)) s
       (gl:uniformi (gficl:shader-loc shader "correct_uv") 0)
+      (gl:uniformi (gficl:shader-loc shader "scene_noise") 0)
       (gl:uniformf (gficl:shader-loc shader "time") time)
       (gficl:bind-matrix shader "viewproj" viewproj))))
 
@@ -31,27 +32,48 @@
       (gl:uniformi (gficl:shader-loc shader "output_noise") 0)
       (gficl:bind-gl tex))))
 
-(defmethod fw:shader-scene-props ((s main-shader) (scene bg-scene))
-  (with-slots (proj viewproj) scene
-    (with-slots ((shader fw:shader)) s
-      (gl:uniformi (gficl:shader-loc shader "correct_uv") 1)
-      (gl:uniformf (gficl:shader-loc shader "uv_speed") 0.5)
-      (gficl:bind-matrix shader "uv_mat" viewproj)
-      (gficl:bind-matrix shader "viewproj" proj))))
+(defmethod fw:shader-model-props ((s main-shader) (o game-object))
+	   (call-next-method)
+	   (with-slots (rect) o
+	       (let ((w (gficl:vec-ref rect 2)))
+		 (with-slots ((shader fw:shader)) s
+		   (gl:uniformf (gficl:shader-loc shader "speed") 0)
+		   (gl:uniformf (gficl:shader-loc shader "obj_size") 0)))))
 
-(defmethod fw:shader-model-props ((s main-shader) (o bg-object))
+(defmethod fw:shader-scene-props ((s main-shader) (scene bg-scene))
+	   (with-slots (proj viewproj) scene
+	     (with-slots ((shader fw:shader)) s
+	       (gl:uniformi (gficl:shader-loc shader "correct_uv") 1)
+	       (gl:uniformf (gficl:shader-loc shader "uv_speed") 0.5)
+	       (gficl:bind-matrix shader "uv_mat" viewproj)
+	       (gficl:bind-matrix shader "viewproj" proj))))
+
+(defmethod fw:shader-scene-props ((s main-shader) (scene dream-scene))
   (call-next-method)
   (with-slots ((shader fw:shader)) s
-    (with-slots (uv-model) o
-      (gficl:bind-matrix shader "uv_model" uv-model))))
+    (gl:uniformi (gficl:shader-loc shader "scene_noise") 1)
+    (gl:uniformf (gficl:shader-loc shader "speed") 0.01)))
+
+
+(defmethod fw:shader-model-props ((s main-shader) (o bg-object))
+	   (call-next-method)
+	   (with-slots ((shader fw:shader)) s
+	     (with-slots (uv-model) o
+	       (gficl:bind-matrix shader "uv_model" uv-model)
+	       (gl:active-texture :texture1)
+	       (gficl:bind-gl (cdr (assoc :tex (fw:get-asset 'noise)))))
+	     (with-slots (rect) o
+	       (let ((w (gficl:vec-ref rect 2)))
+		 (gl:uniformf (gficl:shader-loc shader "speed") 0.005)
+		 (gl:uniformf (gficl:shader-loc shader "obj_size") w)))))
 
 (defmethod fw:shader-model-props ((s main-shader) (o noise-object))
   (call-next-method)  
   (with-slots ((shader fw:shader)) s
     (with-slots (noise-speed) o
-      (gl:uniformf (gficl:shader-loc shader "speed") noise-speed
-		   )
+      (gl:uniformf (gficl:shader-loc shader "speed") noise-speed)
       (gl:uniformi (gficl:shader-loc shader "output_noise") 1)
+      (gl:uniformf (gficl:shader-loc shader "obj_size") -400)
       (gl:active-texture :texture1)
       (gficl:bind-gl (cdr (assoc :tex (fw:get-asset 'noise)))))))
 

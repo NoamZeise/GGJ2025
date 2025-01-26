@@ -94,6 +94,23 @@
     (loop for o in objects do
 	  (update-model o))))
 
+;;; Dream Scene
+
+(defclass dream-scene (scene)
+  ())
+
+(defun make-dream-scene ()
+  (make-instance
+   'dream-scene
+   :objects (list)))
+
+(defclass dream-bg (bg-scene dream-scene) ())
+
+(defun make-dream-bg-scene ()
+  (make-instance
+   'dream-bg
+   :objects (list)))
+
 ;;; Post Scene
 
 (defclass dummy-object (object) ())

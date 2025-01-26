@@ -4,4 +4,4 @@
 (defpackage ggj2025
   (:use :cl)
   (:local-nicknames (:fw :framework))
-  (:export #:run))
+  (:export #:run #:program))

@@ -10,7 +10,7 @@
   :defsystem-depends-on (:deploy)
   :build-operation "deploy-op"
   :build-pathname "ggj2025"
-  :entry-point "ggj2025:run"
+  :entry-point "ggj2025:program"
   :depends-on (:framework)
   :components ((:module "src"
 		:components
