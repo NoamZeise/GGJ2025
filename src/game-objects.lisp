@@ -146,3 +146,34 @@
 		     (setf colour (gficl:make-vec '(1 0.6 0.6 1))))))
 	   (setf colour (gficl:make-vec '(1 1 1 1))))))
      (call-next-method))))
+
+
+;;; BG
+(defclass bg-object (game-object)
+  ((scale :initarg :scale :initform 1.0 :type float)
+   (size :initarg :size :initform 1.0 :type float)
+   (uv-model :initform (gficl:make-matrix) :type matrix)))
+
+(defun make-bg-obj (x y width height depth tex-asset &optional (scale 1.0) (size 1.0))
+  (let ((obj (make-game-obj x y width height depth tex-asset 'bg-object)))
+    (with-slots ((s scale) (sz size)) obj
+      (setf s scale)
+      (setf sz size)
+      obj)))
+
+(defmethod update-model ((obj bg-object))
+  (call-next-method)
+  (with-slots (rect depth scale uv-model size) obj
+    (destructuring-bind
+     (x y width height) (gficl:vec-data rect)
+     (declare (ignore x y))
+     (setf uv-model
+	   (let ((sx (* *x* scale))
+		 (sy (* -1 *y* scale))
+		 (z (expt *zoom* (- scale)))
+		 (ratio (/ width height)))
+	     (gficl:*mat
+	      (gficl:scale-matrix (list size (- size) 1))
+	      (gficl:translation-matrix (list (/ (* 1 sx) (* width 0.5))
+					      (/ sy (* height 0.5)) depth))
+	      (gficl:scale-matrix (list (* 1 z) z 1))))))))

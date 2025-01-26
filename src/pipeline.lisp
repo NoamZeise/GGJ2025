@@ -9,13 +9,15 @@
      (gl:uniformi (gficl:shader-loc shader "tex") 0)))
 
 (defmethod fw:draw ((s main-shader) scene)
-  (gl:enable :depth-test)
+  (gl:enable :depth-test :blend)
+  (gl:blend-func :src-alpha :one-minus-src-alpha)
   (gl:active-texture :texture0)
   (call-next-method))
 
 (defmethod fw:shader-scene-props ((s main-shader) (scene scene))
   (with-slots (viewproj) scene
     (with-slots ((shader fw:shader)) s
+      (gl:uniformi (gficl:shader-loc shader "correct_uv") 0)
       (gficl:bind-matrix shader "viewproj" viewproj))))
 
 (defmethod fw:shader-model-props ((s main-shader) (o object))
@@ -24,6 +26,20 @@
       (gficl:bind-matrix shader "model" model)
       (gficl:bind-vec shader "tint" colour)
       (gficl:bind-gl tex))))
+
+(defmethod fw:shader-scene-props ((s main-shader) (scene bg-scene))
+  (with-slots (proj viewproj) scene
+    (with-slots ((shader fw:shader)) s
+      (gl:uniformi (gficl:shader-loc shader "correct_uv") 1)
+      (gl:uniformf (gficl:shader-loc shader "uv_speed") 0.5)
+      (gficl:bind-matrix shader "uv_mat" viewproj)
+      (gficl:bind-matrix shader "viewproj" proj))))
+
+(defmethod fw:shader-model-props ((s main-shader) (o bg-object))
+  (call-next-method)
+  (with-slots ((shader fw:shader)) s
+    (with-slots (uv-model) o
+      (gficl:bind-matrix shader "uv_model" uv-model))))
 
 ;;; Main Pass
 

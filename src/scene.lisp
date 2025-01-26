@@ -71,6 +71,26 @@
    'main-scene
    :objects (list)))
 
+;;; BG Scene
+
+(defclass bg-scene (scene) ())
+
+(defun make-bg-scene ()
+  (make-instance
+   'bg-scene
+   :objects (list)))
+
+(defmethod set-view ((scene bg-scene) (view-mat gficl:matrix))
+  (with-slots (view proj viewproj) scene
+    (setf view view-mat)
+    (setf viewproj proj)))
+
+(defmethod fw:update-scene ((s bg-scene) dt)
+  (call-next-method)
+  (with-slots (objects) s
+    (loop for o in objects do
+	  (update-model o))))
+
 ;;; Post Scene
 
 (defclass dummy-object (object) ())

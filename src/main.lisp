@@ -32,9 +32,13 @@
 		   ((0 1) (0 1)))
 		 '(0 3 2 2 1 0)))
   (fw:load-image 'test #p"assets/test.png")
-  (fw:load-image 'fairy #p"assets/fairy.png")
+  (fw:load-image 'fairy #p"assets/bubbalah.png")
   (fw:load-image 'bouba #p"assets/bouba.png")
-  (fw:load-image 'arrow #p"assets/arrow.png"))
+  (fw:load-image 'arrow #p"assets/arrow.png")
+  (fw:load-image 'bg0 #p"assets/bg0.png")
+  (fw:load-image 'bg1 #p"assets/bg1.png")
+  (fw:load-image 'bg-clouds1 #p"assets/bg-clouds1.png")
+  (fw:load-image 'bg-stars #p"assets/bg-stars.png"))
 
 (defun create-pipelines ()
   (setf *main-pipeline* (make-main-pipeline *target-width* *target-height*)))
@@ -79,7 +83,8 @@
 
 (defun render ()
   (gficl:with-render
-   (fw:draw *main-pipeline* (list (main-scene *game*)))))
+   (fw:draw *main-pipeline*
+	    (list (bg-scene *game*) (main-scene *game*)))))
 
 ;;; signal running program functions
 
