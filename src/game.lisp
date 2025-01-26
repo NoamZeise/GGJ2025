@@ -58,21 +58,25 @@
 (defun make-game (width height)
   (let ((main-scene (make-main-scene))
 	(player (make-player 0 0))
-	(player-aim (make-game-obj 0 0 10 10 -0.1 (fw:get-asset 'arrow) 0)))
+	(player-aim (make-game-obj 0 0 20 20 -0.1 (fw:get-asset 'arrow) 0))
+	(dream (make-noise-obj 200 200 800 800 -0.1 0.01 (fw:get-asset 'dreamb) 0.2)))
     ;; Main Scene
     (with-slots (hidden pivot) player-aim
       (setf hidden t)
       (setf pivot (gficl:make-vec '(5 0))))
     (fw:resize main-scene width height)
+    
+    (add-object main-scene dream)
     (add-object main-scene player)
     (add-object main-scene player-aim)
+    
     (make-instance
      'game
      :player player
      :main-scene main-scene
      :bg-scene (setup-bg width height)
      :player-aim player-aim
-     :colliders (list ))))
+     :colliders (list dream))))
 
 (defgeneric update-obj (obj dt))
 
@@ -84,8 +88,8 @@
       (gficl:map-keys-pressed
        (:p))
 
-      (if (< (length colliders) 100)
-	  (cond ((> nearest-obs 500)
+      (if (< (length colliders) 120)
+	  (cond ((> nearest-obs (* 4 *target-width* *target-height*))
 		 (let ((new-obs (gen-obstacles (get-cam-rect cam) 2)))
 		   (loop for o in new-obs do (add-object main-scene o))
 		   (setf colliders
@@ -113,7 +117,7 @@
 			     (d (gficl:dot diff diff)))
 			(if (or (> nearest-obs d) (= nearest-obs 0))
 			    (setf nearest-obs d))
-			(if (> d (* *target-width* *target-height* 30))
+			(if (> d (* *target-width* *target-height* 10))
 			    (setf (slot-value c 'active) nil)))
 		      c)))))    
     (target cam (get-target player) (selected player) dt)
@@ -178,7 +182,7 @@
     (add-object bg-scene
 		(make-bg-obj 0 0
 			     *target-width* *target-height*
-			     -0.981 (fw:get-asset 'bg-clouds1) 0.01 0.4))
+			     -0.981 (fw:get-asset 'bg-clouds1) 0.01 1))
     (add-object bg-scene
 		(make-bg-obj 0 0
 			     *target-width* *target-height*
@@ -191,7 +195,8 @@
 
 (defun gen-obstacles (rect n)
   (loop for i from 0 to n collecting
-	(let ((obs (get-obstacle)))
+	(let ((obs (get-obstacle))
+	      (offset (random *target-width*)))
 	  (with-slots ((r rect)) obs
 	    (destructuring-bind
 	     (ox oy ow oh) (gficl:vec-data r)
@@ -201,25 +206,29 @@
 	      (if (= 0 (random 2))
 		  (progn
 		    (setf (gficl:vec-ref r 0)
-			  (+ (- x ow) (random (+ w ow))))
+			  (+ (- x (+ ow 100)) (random (+ w ow 100))))
 		    (setf (gficl:vec-ref r 1)
 			  (if (= 0 (random 2))
-			      (- y (* 2 oh)) (+ y h oh))))
+			      (- y (+ (* 2 oh) offset)) (+ y h oh offset))))
 		(progn
 		  (setf (gficl:vec-ref r 0)
 			(if (= 0 (random 2))
-			    (- x (* 2 ow)) (+ x w ow)))
+			    (- x (+ (* 2 ow) offset)) (+ x w ow offset)))
 		  (setf (gficl:vec-ref r 1)
-			(+ (- y oh) (random (+ h oh))))))
+			(+ (- y (+ oh 100)) (random (+ h oh 100))))))
 	      obs))))))
 
 (defun get-obstacle ()
-  (let* ((width (+ 40 (random 200.0)))
+  (let* ((large (= 0 (random 5)))
+	 (width (+ 80 (if large (random 400.0) (random 120.0))))
 	 (objs (list
 		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'gloogs) 0.5 :mass-mult 0.2)
-		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'ringus) 0.5)
-		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'planbit) 0.5)
-		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'orring) 0.5)
-		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'bloog) 0.5)))
+		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'ringus) 0.5 :mass-mult 3)
+		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'orring) 0.5 :mass-mult 1.2)
+		`(make-game-obj 0 0 ,width ,width 0 (fw:get-asset 'bloog) 0.5 :mass-mult 0.8)))
 	 (n (random (length objs))))
     (eval (nth n objs))))
+
+(defun get-dream ()
+  (let* ((objs (list
+		`(make-noise-obj 0 0 800 800 -0.1 0.01 (fw:get-asset 'dreamb) 1))))))

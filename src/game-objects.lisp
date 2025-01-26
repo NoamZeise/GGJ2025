@@ -119,7 +119,7 @@
    (aim-dir :initform (gficl:make-vec '(0 0)) :type gficl:vec :accessor aim-dir)))
 
 (defun make-player (x y)
-  (let ((player (make-game-obj x y 40 40 0 (fw:get-asset 'fairy) 0.64 :type 'player)))
+  (let ((player (make-game-obj x y 80 80 -0.01 (fw:get-asset 'fairy) 0.64 :type 'player)))
     player))
 
 (defmethod update-obj ((p player) dt)
@@ -135,8 +135,8 @@
 	       (progn
 		 (setf *game-speed* 1)
 		 (setf selected nil)
-		 (setf velocity (gficl:*vec 2 hit-vec))
-		 (setf angular-velocity (* 0.09 (gficl:magnitude hit-vec))))))
+		 (setf velocity (gficl:*vec 3 hit-vec))
+		 (setf angular-velocity (* 0.01 (gficl:magnitude hit-vec))))))
        (progn
 	 (if (contains rect (gficl:make-vec (list mx my)))
 	     (progn
@@ -149,6 +149,22 @@
 	   (setf colour (gficl:make-vec '(1 1 1 1))))))
      (call-next-method))))
 
+(defmethod )
+
+
+;;; Noise
+
+(defclass noise-object (game-object)
+  ((noise-speed :initform 0.0 :type float)))
+
+(defun make-noise-obj (x y width height depth radius tex-asset mass-mult)
+  (let ((obj (make-game-obj x y width height depth tex-asset radius
+			    :mass-mult mass-mult :type 'noise-object)))
+    (with-slots ((ns noise-speed) angular-friction angular-velocity) obj
+      (setf ns (+ 0.01 (- (random 0.02) 0.01)))
+      (setf angular-friction 0.0)
+      (setf angular-velocity (/ (random 100) 400)))
+    obj))
 
 ;;; BG
 (defclass bg-object (game-object)

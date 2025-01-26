@@ -1,7 +1,7 @@
 (in-package :ggj2025)
 
-(defparameter *target-width* 800)
-(defparameter *target-height* 450)
+(defparameter *target-width* 1600)
+(defparameter *target-height* 900)
 (defparameter *inverse-target-mat* (gficl:make-matrix))
 (defparameter *inverse-main-view-mat* (gficl:make-matrix))
 (defparameter *game-speed* 1)

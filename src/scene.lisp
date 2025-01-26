@@ -31,7 +31,8 @@
   ((view :initform (gficl:make-matrix) :type gficl:matrix)
    (proj :type gficl:matrix)
    (viewproj :type gficl:matrix)
-   (objects :initarg :objects)))
+   (objects :initarg :objects)
+   (time :initform 0.0 :type float)))
 
 (defmethod fw:resize ((s scene) w h)
   (with-slots (view proj viewproj) s
@@ -49,7 +50,8 @@
     (setf viewproj (gficl:*mat proj view))))
 
 (defmethod fw:update-scene ((s scene) dt)
- (with-slots (objects) s
+ (with-slots (time objects) s
+   (setf time (+ time dt))
    (setf objects
 	 (loop for o in objects when
 	       (slot-value o 'active)
@@ -64,7 +66,8 @@
 
 ;;; Main Scene
 
-(defclass main-scene (scene) ())
+(defclass main-scene (scene)
+  ())
 
 (defun make-main-scene ()
   (make-instance
@@ -103,16 +106,14 @@
 (defclass post-scene (scene)
   ((width :initarg :width)
    (height :initarg :height)
-   (tex :initarg :tex)))
+   (tex :initarg :tex)
+   (noise :initarg :noise)))
 
-(defun make-post-scene (tex target-w target-h)
+(defun make-post-scene (tex noise target-w target-h)
   (make-instance
    'post-scene
-   :tex tex :width target-w :height target-h
+   :tex tex :noise noise :width target-w :height target-h
    :objects (list (make-instance 'dummy-object))))
-
-(defun update-post-scene-tex (post-scene tex)
-  (setf (slot-value post-scene 'tex) tex))
 
 (defmethod fw:resize ((s post-scene) w h)
   (with-slots (viewproj width height) s

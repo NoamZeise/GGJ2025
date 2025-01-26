@@ -35,9 +35,11 @@
   
   (fw:load-image 'bloog #p"assets/Bloog.png")  
   (fw:load-image 'orring #p"assets/Orring.png")
-  (fw:load-image 'planbit #p"assets/Planbit.png")
   (fw:load-image 'ringus #p"assets/Ringus.png")
   (fw:load-image 'gloogs #p"assets/Gloogs.png")
+
+  (fw:load-image 'dreamb #p"assets/Dreamb.png")
+  (fw:load-image 'dreamp #p"assets/Dreamp.png")
 
   (fw:load-image 'gloob #p"assets/Gloob.png")
   (fw:load-image 'swirl #p"assets/Swirl.png")
@@ -49,7 +51,9 @@
   (fw:load-image 'bg0 #p"assets/bg0.png")
   (fw:load-image 'bg1 #p"assets/bg1.png")
   (fw:load-image 'bg-clouds1 #p"assets/bg-clouds1.png")
-  (fw:load-image 'bg-stars #p"assets/bg-stars.png"))
+  (fw:load-image 'bg-stars #p"assets/bg-stars.png")
+
+  (fw:load-image 'noise #p"assets/noise.png"))
 
 (defun create-pipelines ()
   (setf *main-pipeline* (make-main-pipeline *target-width* *target-height*)))

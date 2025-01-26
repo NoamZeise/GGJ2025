@@ -6,7 +6,8 @@
 
 (defmethod fw:reload ((s main-shader))
   (fw:shader-reload-files (s (#p"main.vs" #p"main.fs")) shader
-     (gl:uniformi (gficl:shader-loc shader "tex") 0)))
+     (gl:uniformi (gficl:shader-loc shader "tex") 0)
+     (gl:uniformi (gficl:shader-loc shader "noise_tex") 1)))
 
 (defmethod fw:draw ((s main-shader) scene)
   (gl:enable :depth-test :blend)
@@ -15,9 +16,10 @@
   (call-next-method))
 
 (defmethod fw:shader-scene-props ((s main-shader) (scene scene))
-  (with-slots (viewproj) scene
+  (with-slots (time viewproj) scene
     (with-slots ((shader fw:shader)) s
       (gl:uniformi (gficl:shader-loc shader "correct_uv") 0)
+      (gl:uniformf (gficl:shader-loc shader "time") time)
       (gficl:bind-matrix shader "viewproj" viewproj))))
 
 (defmethod fw:shader-model-props ((s main-shader) (o object))
@@ -25,6 +27,8 @@
     (with-slots ((shader fw:shader)) s      
       (gficl:bind-matrix shader "model" model)
       (gficl:bind-vec shader "tint" colour)
+      (gl:active-texture :texture0)
+      (gl:uniformi (gficl:shader-loc shader "output_noise") 0)
       (gficl:bind-gl tex))))
 
 (defmethod fw:shader-scene-props ((s main-shader) (scene bg-scene))
@@ -41,6 +45,16 @@
     (with-slots (uv-model) o
       (gficl:bind-matrix shader "uv_model" uv-model))))
 
+(defmethod fw:shader-model-props ((s main-shader) (o noise-object))
+  (call-next-method)  
+  (with-slots ((shader fw:shader)) s
+    (with-slots (noise-speed) o
+      (gl:uniformf (gficl:shader-loc shader "speed") noise-speed
+		   )
+      (gl:uniformi (gficl:shader-loc shader "output_noise") 1)
+      (gl:active-texture :texture1)
+      (gficl:bind-gl (cdr (assoc :tex (fw:get-asset 'noise)))))))
+
 ;;; Main Pass
 
 (defclass main-pass (fw:pass) ())
@@ -52,8 +66,9 @@
    :description
    (fw:make-framebuffer-description
     (list (gficl:make-attachment-description :type :texture)
+	  (gficl:make-attachment-description :type :texture :position :color-attachment1)
 	  (gficl:make-attachment-description :position :depth-attachment))    
-    :samples 16)
+    :samples 1)
    :clear-colour '(0.184 0.156 0.458 0.0)))
 
 ;;; Post Shader
@@ -64,13 +79,16 @@
   (fw:shader-reload-files (s (#p"post.vs" #p"post.fs")
 			     :folder (fw:shader-subfolder #p"post/"))
 			  shader
-    (gl:uniformi (gficl:shader-loc shader "screen") 0)))
+    (gl:uniformi (gficl:shader-loc shader "screen") 0)
+    (gl:uniformi (gficl:shader-loc shader "noise") 1)))
 
 (defmethod fw:shader-scene-props ((s post-shader) (scene post-scene))
-  (with-slots (tex viewproj) scene
+  (with-slots (tex noise viewproj) scene
     (with-slots ((shader fw:shader)) s
       (gl:active-texture :texture0)
       (gl:bind-texture :texture-2d tex)
+      (gl:active-texture :texture1)
+      (gl:bind-texture :texture-2d noise)
       (gficl:bind-matrix shader "transform" viewproj))))
 
 (defmethod fw:shader-model-props ((s post-shader) (o dummy-object)) ())
@@ -108,7 +126,9 @@ Can only draw a POST-SCENE with a POST-PASS"))
 	       'main-pipeline
 	       :passes (list (cons :main main-pass)
 			     (cons :post (make-post-pass)))
-	       :post-scene (make-post-scene (fw:get-pass-texture main-pass) target-w target-h))))
+	       :post-scene (make-post-scene (fw:get-pass-texture main-pass)
+					    (fw:get-pass-texture main-pass :color-attachment1)
+					    target-w target-h))))
       (fw:resize main-pass target-w target-h)
       pl)))
 
