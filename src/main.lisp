@@ -31,7 +31,7 @@
 		   ((1 1) (1 1))
 		   ((0 1) (0 1)))
 		 '(0 3 2 2 1 0)))
-  (fw:load-image 'fairy #p"assets/bubbalah.png")
+  (fw:load-image 'fairy #p"assets/Bubbalah.png")
   
   (fw:load-image 'bloog #p"assets/Bloog.png")  
   (fw:load-image 'orring #p"assets/Orring.png")

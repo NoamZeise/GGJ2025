@@ -148,10 +148,10 @@ Can only draw a POST-SCENE with a POST-PASS"))
 	       'main-pipeline
 	       :passes (list (cons :main main-pass)
 			     (cons :post (make-post-pass)))
-	       :post-scene (make-post-scene (fw:get-pass-texture main-pass)
-					    (fw:get-pass-texture main-pass :color-attachment1)
+	       :post-scene (make-post-scene
+			    (fw:get-pass-texture main-pass)
+			    (fw:get-pass-texture main-pass :color-attachment1)
 					    target-w target-h))))
-      (fw:resize main-pass target-w target-h)
       pl)))
 
 (defmethod fw:resize ((pl main-pipeline) (w integer) (h integer))
